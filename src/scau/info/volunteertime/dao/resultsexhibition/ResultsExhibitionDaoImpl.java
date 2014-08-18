@@ -38,7 +38,8 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 
 	@Override
 	public String get(int size) {
-		String sql = "SELECT * FROM results ORDER BY publishTime DESC LIMIT 0," + size;
+		String sql = "SELECT * FROM results ORDER BY publishTime DESC LIMIT 0,"
+				+ size;
 
 		String jsonInfo = null;
 		Connection conn = null;
@@ -86,12 +87,7 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 			// 遍历每一列
 			for (int i = 1; i <= columnCount; i++) {
 				String columnName = metaData.getColumnLabel(i);
-				String value;
-				// if(columnName.contains("PIC")||columnName.contains("pic"))
-				// value =
-				// Environment.getImageServer()+rs.getString(columnName);
-				// else
-				value = rs.getString(columnName);
+				String value = rs.getString(columnName);
 				jsonObj.put(columnName, value);
 			}
 			array.put(jsonObj);
