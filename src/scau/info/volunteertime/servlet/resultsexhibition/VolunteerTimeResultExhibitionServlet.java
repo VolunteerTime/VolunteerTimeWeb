@@ -53,7 +53,137 @@ public class VolunteerTimeResultExhibitionServlet extends HttpServlet {
 			case 0:
 				sendNewData(request, response);
 				break;
+			case 1:
+				sendDowmData(request, response);
+				break;
+			case 2:
+				sendDropDownData(request, response);
+				break;
 			}
+		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 */
+	private void sendDropDownData(HttpServletRequest request,
+			HttpServletResponse response) {
+		int currentPageSize = 0;
+		long time = 0;
+		String currentPageNumberParam = request.getParameter("currentPageSize");
+		String fTime = request.getParameter("firstTime");
+		if (currentPageNumberParam != null) {
+			currentPageSize = Integer.parseInt(currentPageNumberParam);
+		}
+
+		if (fTime != null) {
+			time = Long.parseLong(fTime);
+			System.out.println("time = " + time);
+		}
+
+		// 设置输出内容的文档类型和编码
+		response.setContentType("text/javascript;charset=UTF-8");
+
+		log.debug("****************成果展示数据查询****************");
+		log.debug("开始查询······");
+		System.out.println("****************成果展示数据查询****************");
+		System.out.println("开始查询······");
+
+		String rsStr = "";
+
+		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
+		// 创建Dao对象，用于从数据库查询数据
+
+		ResultsExhibitionDao dao = new ResultsExhibitionDaoImpl();
+
+		try {
+			// 获取系统当前时间，统计 花费时间
+			long startTime = System.currentTimeMillis();
+
+			if (currentPageSize != 0)
+				rsStr = dao.getUp(time, currentPageSize);
+			else
+				rsStr = dao.getUp(time, 5);
+
+			// 获取系统当前时间，统计花费时间
+			long endTime = System.currentTimeMillis();
+			log.debug("查询所花时间：" + (endTime - startTime) + "毫秒");
+			log.debug("查询结果：" + rsStr);
+
+			// 获取http输出流对象
+			PrintWriter writer = response.getWriter();
+			log.debug("开始网络传输······");
+			// 获取系统当前时间，用于统计所花费的时间
+			startTime = System.currentTimeMillis();
+			writer.write(rsStr);
+			// 获取系统当前时间，用于统计所花费的时间
+			endTime = System.currentTimeMillis();
+			log.debug("网络传输所花时间：" + (endTime - startTime) + "毫秒");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 */
+	private void sendDowmData(HttpServletRequest request,
+			HttpServletResponse response) {
+		int currentPageSize = 0;
+		long time = 0;
+		String currentPageNumberParam = request.getParameter("currentPageSize");
+		String eTime = request.getParameter("endTime");
+		if (currentPageNumberParam != null) {
+			currentPageSize = Integer.parseInt(currentPageNumberParam);
+		}
+
+		if (eTime != null) {
+			time = Long.parseLong(eTime);
+			System.out.println("time = " + time);
+		}
+
+		// 设置输出内容的文档类型和编码
+		response.setContentType("text/javascript;charset=UTF-8");
+
+		log.debug("****************成果展示数据查询****************");
+		log.debug("开始查询······");
+		System.out.println("****************成果展示数据查询****************");
+		System.out.println("开始查询······");
+
+		String rsStr = "";
+
+		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
+		// 创建Dao对象，用于从数据库查询数据
+
+		ResultsExhibitionDao dao = new ResultsExhibitionDaoImpl();
+
+		try {
+			// 获取系统当前时间，统计 花费时间
+			long startTime = System.currentTimeMillis();
+
+			if (currentPageSize != 0)
+				rsStr = dao.getDown(time, currentPageSize);
+			else
+				rsStr = dao.getDown(time, 5);
+
+			// 获取系统当前时间，统计花费时间
+			long endTime = System.currentTimeMillis();
+			log.debug("查询所花时间：" + (endTime - startTime) + "毫秒");
+			log.debug("查询结果：" + rsStr);
+
+			// 获取http输出流对象
+			PrintWriter writer = response.getWriter();
+			log.debug("开始网络传输······");
+			// 获取系统当前时间，用于统计所花费的时间
+			startTime = System.currentTimeMillis();
+			writer.write(rsStr);
+			// 获取系统当前时间，用于统计所花费的时间
+			endTime = System.currentTimeMillis();
+			log.debug("网络传输所花时间：" + (endTime - startTime) + "毫秒");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

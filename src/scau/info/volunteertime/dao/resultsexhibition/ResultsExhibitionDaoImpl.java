@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,6 +66,68 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		return jsonInfo;
 	}
 
+	@Override
+	public String getDown(long time, int currentPageSize) {
+		String sql = "SELECT * FROM results WHERE publishTime < " + time
+				+ " ORDER BY publishTime DESC LIMIT 0," + currentPageSize;
+
+		System.out.println("sql = " + sql);
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+
+			jsonInfo = resultSetToJsonPagination(rs, currentPageSize);
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return jsonInfo;
+	}
+
+	@Override
+	public String getUp(long time, int currentPageSize) {
+		String sql = "SELECT * FROM results WHERE publishTime > " + time
+				+ " ORDER BY publishTime DESC";
+
+		System.out.println("sql = " + sql);
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+
+			jsonInfo = resultSetToJsonPagination(rs, currentPageSize);
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return jsonInfo;
+	}
+
 	/**
 	 * @param rs
 	 * @param size
@@ -95,7 +158,7 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		JSONObject json = new JSONObject();
 		json.put("records", array);
 
-		json.put("pageSize", size);
+		json.put("pageSize", columnCount);
 
 		return json.toString();
 	}

@@ -17,4 +17,18 @@ public interface ResultsExhibitionDao {
 
 	public abstract String get(int size);
 
+	/**
+	 * @param time
+	 * @param currentPageSize
+	 * @return String
+	 */
+	public abstract String getDown(long time, int currentPageSize);
+
+	/**
+	 * @param time
+	 * @param currentPageSize
+	 * @return String
+	 */
+	public abstract String getUp(long time, int currentPageSize);
+
 }
