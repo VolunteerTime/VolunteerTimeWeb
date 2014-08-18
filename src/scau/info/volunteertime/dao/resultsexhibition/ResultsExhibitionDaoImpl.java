@@ -38,7 +38,7 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 
 	@Override
 	public String get(int size) {
-		String sql = "SELECT * FROM results ORDER BY id DESC LIMIT 0," + size;
+		String sql = "SELECT * FROM results ORDER BY publishTime DESC LIMIT 0," + size;
 
 		String jsonInfo = null;
 		Connection conn = null;
