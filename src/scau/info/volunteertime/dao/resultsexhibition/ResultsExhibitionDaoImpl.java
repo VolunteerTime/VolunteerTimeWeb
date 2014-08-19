@@ -143,10 +143,12 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		ResultSetMetaData metaData = rs.getMetaData();
 		int columnCount = metaData.getColumnCount();
 
+		int count = 0;
+
 		// 遍历ResultSet中的每条数据
 		while (rs.next()) {
 			JSONObject jsonObj = new JSONObject();
-
+			count++;
 			// 遍历每一列
 			for (int i = 1; i <= columnCount; i++) {
 				String columnName = metaData.getColumnLabel(i);
@@ -158,7 +160,7 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		JSONObject json = new JSONObject();
 		json.put("records", array);
 
-		json.put("pageSize", columnCount);
+		json.put("pageSize", count);
 
 		return json.toString();
 	}
