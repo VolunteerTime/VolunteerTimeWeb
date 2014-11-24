@@ -31,4 +31,8 @@ public interface ResultsExhibitionDao {
 	 */
 	public abstract String getUp(long time, int currentPageSize);
 
+	public abstract String checkDate(String ids);
+
+	public abstract String updateReadNum(int id);
+
 }

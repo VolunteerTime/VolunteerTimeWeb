@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,6 +127,69 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		return jsonInfo;
 	}
 
+	@Override
+	public String checkDate(String ids) {
+		try {
+			Connection conn = null;
+			Statement statement;
+			ResultSet rs;
+			DatabaseConnection dbc = null;
+
+			// 输入
+			JSONObject jsonObject = new JSONObject(ids);
+			JSONArray jsonArray = jsonObject.getJSONArray("array");
+
+			JSONObject jsonResult;
+
+			// 数据库初始化
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+
+			JSONArray array = new JSONArray();
+			JSONObject jsonObj;
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+
+				jsonResult = jsonArray.getJSONObject(i);
+				int id = jsonResult.getInt("id");
+				String sql = "SELECT id,read_num FROM results WHERE id = " + id;
+				rs = statement.executeQuery(sql);
+
+				System.out.println("checkDate id = " + id + "rs.getRow() = "
+						+ rs.getRow());
+				if (rs.next()) {
+					jsonObj = new JSONObject();
+					String value = rs.getString("id");
+					jsonObj.put("id", value);
+					System.out.println("checkDate value1 = " + value);
+					value = rs.getString("read_num");
+					jsonObj.put("read_num", value);
+					System.out.println("checkDate value2 = " + value);
+					array.put(jsonObj);
+				} else {
+					jsonObj = new JSONObject();
+					jsonObj.put("id", id);
+					jsonObj.put("read_num", -1);
+					array.put(jsonObj);
+				}
+
+			}
+
+			JSONObject json = new JSONObject();
+			json.put("array", array);
+			conn.close();
+			dbc.close();
+			return json.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
 	/**
 	 * @param rs
 	 * @param size
@@ -163,6 +225,36 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		json.put("pageSize", count);
 
 		return json.toString();
+	}
+
+	@Override
+	public String updateReadNum(int id) {
+		String sql = "UPDATE results SET read_num = read_num + 1 WHERE id = "
+				+ id;
+
+		System.out.println("sql = " + sql);
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			statement.executeUpdate(sql);
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "failure";
+		}
+
+		return "success";
 	}
 
 }
