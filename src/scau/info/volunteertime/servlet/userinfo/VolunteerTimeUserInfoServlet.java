@@ -2,6 +2,8 @@ package scau.info.volunteertime.servlet.userinfo;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,8 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import scau.info.volunteertime.dao.activitycenter.ActivityCenterDao;
-import scau.info.volunteertime.dao.activitycenter.ActivityCenterDaoImpl;
 import scau.info.volunteertime.dao.userinfo.UserInfoDao;
 import scau.info.volunteertime.dao.userinfo.UserInfoDaoImpl;
 
@@ -76,6 +76,18 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 		String qq = request.getParameter("qq");
 		String wechant = request.getParameter("wechant");
 
+		try {
+			name = new String(name.getBytes("ISO-8859-1"), "UTF-8");
+			sex = new String(sex.getBytes("ISO-8859-1"), "UTF-8");
+			className = new String(className.getBytes("ISO-8859-1"), "UTF-8");
+			wechant = new String(wechant.getBytes("ISO-8859-1"), "UTF-8");
+			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
+			password = new String(password.getBytes("ISO-8859-1"), "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		log.debug("****************成果展示数据查询****************");
 		log.debug("开始查询······");
 		System.out.println("****************成果展示数据查询****************");
@@ -123,6 +135,13 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 		String userId = request.getParameter("userId");
 		String password = request.getParameter("password");
 
+		try {
+			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
+			password = new String(password.getBytes("ISO-8859-1"), "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// 设置输出内容的文档类型和编码
 		response.setContentType("text/javascript;charset=UTF-8");
 
