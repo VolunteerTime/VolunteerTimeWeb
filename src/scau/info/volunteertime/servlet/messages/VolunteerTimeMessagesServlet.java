@@ -1,9 +1,8 @@
-package scau.info.volunteertime.servlet.userinfo;
+package scau.info.volunteertime.servlet.messages;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,22 +13,24 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import scau.info.volunteertime.dao.messages.MessagesDao;
+import scau.info.volunteertime.dao.messages.MessagesDaoImpl;
 import scau.info.volunteertime.dao.userinfo.UserInfoDao;
 import scau.info.volunteertime.dao.userinfo.UserInfoDaoImpl;
 
 /**
- * Servlet implementation class VolunteerTimeUserInfoServlet
+ * Servlet implementation class VolunteerTimeMessagesServlet
  */
-@WebServlet(description = "VolunteerTimeUserInfoServlet", urlPatterns = { "/VolunteerTimeUserInfoServlet" })
-public class VolunteerTimeUserInfoServlet extends HttpServlet {
+@WebServlet(description = "VolunteerTimeMessagesServlet", urlPatterns = { "/VolunteerTimeMessagesServlet" })
+public class VolunteerTimeMessagesServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory
-			.getLog(VolunteerTimeUserInfoServlet.class);
+			.getLog(VolunteerTimeMessagesServlet.class);
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public VolunteerTimeUserInfoServlet() {
+	public VolunteerTimeMessagesServlet() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -44,13 +45,16 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 		if (actionType != null) {
 			switch (Integer.parseInt(actionType.trim())) {
 			case 0:
-				checkUserLogin(request, response);
+				saveMessages(request, response);
 				break;
 			case 1:
-				checkRegisterUserOne(request, response);
+				getNewMessages(request, response);
 				break;
 			case 2:
-				commitUserData(request, response);
+				UpdateRead(request, response);
+				break;
+			case 3:
+				getNewMessage(request, response);
 				break;
 
 			}
@@ -61,32 +65,20 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 	 * @param request
 	 * @param response
 	 */
-	private void commitUserData(HttpServletRequest request,
+	private void getNewMessage(HttpServletRequest request,
 			HttpServletResponse response) {
-
-		// 设置输出内容的文档类型和编码
-		response.setContentType("text/javascript;charset=UTF-8");
 		String userId = request.getParameter("userId");
+
 		String password = request.getParameter("password");
-		String name = request.getParameter("name");
-		String sex = request.getParameter("sex");
-		String className = request.getParameter("className");
-		String longPhone = request.getParameter("longPhone");
-		String briefPhone = request.getParameter("briefPhone");
-		String qq = request.getParameter("qq");
-		String wechant = request.getParameter("wechant");
 
 		try {
-			name = new String(name.getBytes("ISO-8859-1"), "UTF-8");
-			sex = new String(sex.getBytes("ISO-8859-1"), "UTF-8");
-			className = new String(className.getBytes("ISO-8859-1"), "UTF-8");
-			wechant = new String(wechant.getBytes("ISO-8859-1"), "UTF-8");
 			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
 			password = new String(password.getBytes("ISO-8859-1"), "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		// 设置输出内容的文档类型和编码
+		response.setContentType("text/javascript;charset=UTF-8");
 
 		log.debug("****************成果展示数据查询****************");
 		log.debug("开始查询······");
@@ -98,14 +90,18 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
 		// 创建Dao对象，用于从数据库查询数据
 
-		UserInfoDao dao = new UserInfoDaoImpl();
+		UserInfoDao daoUser = new UserInfoDaoImpl();
+		MessagesDao dao = new MessagesDaoImpl();
 
 		try {
 			// 获取系统当前时间，统计 花费时间
 			long startTime = System.currentTimeMillis();
 
-			rsStr = dao.commitUserData(userId, password, name, sex, className,
-					longPhone, briefPhone, qq, wechant);
+			String checkUser = daoUser.checkUserLogin(userId, password);
+			if (checkUser.trim().equals("1"))
+				rsStr = dao.getNewMessage(userId);
+			else
+				rsStr = "";
 
 			// 获取系统当前时间，统计花费时间
 			long endTime = System.currentTimeMillis();
@@ -130,18 +126,15 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 	 * @param request
 	 * @param response
 	 */
-	private void checkRegisterUserOne(HttpServletRequest request,
+	private void UpdateRead(HttpServletRequest request,
 			HttpServletResponse response) {
-		String userId = request.getParameter("userId");
-		String password = request.getParameter("password");
+		String value = request.getParameter("id");
+		int id = 0;
 
-		try {
-			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
-			password = new String(password.getBytes("ISO-8859-1"), "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		if (value != null) {
+			id = Integer.parseInt(value);
 		}
+
 		// 设置输出内容的文档类型和编码
 		response.setContentType("text/javascript;charset=UTF-8");
 
@@ -155,14 +148,13 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
 		// 创建Dao对象，用于从数据库查询数据
 
-		UserInfoDao dao = new UserInfoDaoImpl();
+		MessagesDao dao = new MessagesDaoImpl();
 
 		try {
 			// 获取系统当前时间，统计 花费时间
 			long startTime = System.currentTimeMillis();
 
-			rsStr = dao.checkUserRegister(userId, password);
-
+			rsStr = dao.updateRead(id);
 			// 获取系统当前时间，统计花费时间
 			long endTime = System.currentTimeMillis();
 			log.debug("查询所花时间：" + (endTime - startTime) + "毫秒");
@@ -186,19 +178,15 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 	 * @param request
 	 * @param response
 	 */
-	private void checkUserLogin(HttpServletRequest request,
+	private void getNewMessages(HttpServletRequest request,
 			HttpServletResponse response) {
 		String userId = request.getParameter("userId");
-		String password = request.getParameter("password");
-		
+
 		try {
 			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
-			password = new String(password.getBytes("ISO-8859-1"), "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
 		// 设置输出内容的文档类型和编码
 		response.setContentType("text/javascript;charset=UTF-8");
 
@@ -212,13 +200,76 @@ public class VolunteerTimeUserInfoServlet extends HttpServlet {
 		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
 		// 创建Dao对象，用于从数据库查询数据
 
-		UserInfoDao dao = new UserInfoDaoImpl();
+		MessagesDao dao = new MessagesDaoImpl();
 
 		try {
 			// 获取系统当前时间，统计 花费时间
 			long startTime = System.currentTimeMillis();
 
-			rsStr = dao.checkUserLogin(userId, password);
+			rsStr = dao.getNewMessages(userId);
+
+			// 获取系统当前时间，统计花费时间
+			long endTime = System.currentTimeMillis();
+			log.debug("查询所花时间：" + (endTime - startTime) + "毫秒");
+			log.debug("查询结果：" + rsStr);
+
+			// 获取http输出流对象
+			PrintWriter writer = response.getWriter();
+			log.debug("开始网络传输······");
+			// 获取系统当前时间，用于统计所花费的时间
+			startTime = System.currentTimeMillis();
+			writer.write(rsStr);
+			// 获取系统当前时间，用于统计所花费的时间
+			endTime = System.currentTimeMillis();
+			log.debug("网络传输所花时间：" + (endTime - startTime) + "毫秒");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	private void saveMessages(HttpServletRequest request,
+			HttpServletResponse response) {
+		String principalId = request.getParameter("principalId");
+		String participators = request.getParameter("participators");
+		String message = request.getParameter("message");
+		String title = request.getParameter("title");
+
+		try {
+			principalId = new String(principalId.getBytes("ISO-8859-1"),
+					"UTF-8");
+			participators = new String(participators.getBytes("ISO-8859-1"),
+					"UTF-8");
+			message = new String(message.getBytes("ISO-8859-1"), "UTF-8");
+			title = new String(title.getBytes("ISO-8859-1"), "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		// 设置输出内容的文档类型和编码
+		response.setContentType("text/javascript;charset=UTF-8");
+
+		log.debug("****************成果展示数据查询****************");
+		log.debug("开始查询······");
+		System.out.println("****************成果展示数据查询****************");
+		System.out.println("开始查询······");
+
+		String rsStr = "";
+
+		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
+		// 创建Dao对象，用于从数据库查询数据
+
+		MessagesDao dao = new MessagesDaoImpl();
+
+		try {
+			// 获取系统当前时间，统计 花费时间
+			long startTime = System.currentTimeMillis();
+
+			rsStr = dao
+					.saveMessages(principalId, participators, message, title);
 
 			// 获取系统当前时间，统计花费时间
 			long endTime = System.currentTimeMillis();

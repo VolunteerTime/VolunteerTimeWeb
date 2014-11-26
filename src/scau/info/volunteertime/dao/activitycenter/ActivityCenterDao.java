@@ -31,4 +31,10 @@ public interface ActivityCenterDao {
 	 */
 	public abstract String updateReadNum(int id);
 
+	/**
+	 * @param userId
+	 * @return
+	 */
+	public abstract String get(String userId);
+
 }

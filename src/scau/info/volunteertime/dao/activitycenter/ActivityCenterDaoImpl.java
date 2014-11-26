@@ -103,7 +103,7 @@ public class ActivityCenterDaoImpl implements ActivityCenterDao {
 
 	@Override
 	public String checkIn(String userId, int activityId) {
-		String sql = "SELECT participators_num , limit_num , group_id FROM activity_center WHERE id ="
+		String sql = "SELECT participators_num , limit_num , group_id , end_time FROM activity_center WHERE id ="
 				+ activityId;
 
 		String jsonInfo = null;
@@ -120,6 +120,12 @@ public class ActivityCenterDaoImpl implements ActivityCenterDao {
 
 			System.out.println("checkDate activityId = " + activityId);
 			if (rs.next()) {
+				long end_time = rs.getLong("end_time");
+				System.out.println("checkDate end_time = " + end_time);
+				if (end_time < System.currentTimeMillis()) {
+					return "failure";
+				}
+
 				int participators_num = rs.getInt("participators_num");
 				System.out.println("checkDate participators_num = "
 						+ participators_num);
@@ -232,7 +238,7 @@ public class ActivityCenterDaoImpl implements ActivityCenterDao {
 	 */
 	@Override
 	public String quitIn(String userId, int activityId) {
-		String sql = "SELECT participators_num , limit_num , group_id FROM activity_center WHERE id ="
+		String sql = "SELECT participators_num , limit_num , group_id , end_time FROM activity_center WHERE id ="
 				+ activityId;
 
 		String jsonInfo = null;
@@ -249,6 +255,12 @@ public class ActivityCenterDaoImpl implements ActivityCenterDao {
 
 			System.out.println("checkDate activityId = " + activityId);
 			if (rs.next()) {
+				long end_time = rs.getLong("end_time");
+				System.out.println("checkDate end_time = " + end_time);
+				if (end_time < System.currentTimeMillis()) {
+					return "failure";
+				}
+
 				int participators_num = rs.getInt("participators_num");
 				System.out.println("checkDate participators_num = "
 						+ participators_num);
@@ -365,6 +377,82 @@ public class ActivityCenterDaoImpl implements ActivityCenterDao {
 		}
 
 		return "success";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.activitycenter.ActivityCenterDao#get(java
+	 * .lang.String)
+	 */
+	@Override
+	public String get(String userId) {
+		String sql = "SELECT * FROM activity_center AS a LEFT OUTER JOIN activity_group AS b ON a.group_id=b.id";
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+
+			jsonInfo = resultSetToJsonPagination(rs, userId);
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return jsonInfo;
+	}
+
+	/**
+	 * @param rs
+	 * @param userId
+	 * @return
+	 */
+	private String resultSetToJsonPagination(ResultSet rs, String userId)
+			throws SQLException, JSONException {
+		// json数组
+		JSONArray array = new JSONArray();
+		// 获取列数
+		ResultSetMetaData metaData = rs.getMetaData();
+		int columnCount = metaData.getColumnCount();
+
+		int count = 0;
+
+		// 遍历ResultSet中的每条数据
+		while (rs.next()) {
+			JSONObject jsonObj = new JSONObject();
+			count++;
+			// 遍历每一列
+			for (int i = 1; i <= columnCount; i++) {
+				String columnName = metaData.getColumnLabel(i);
+				String value = rs.getString(columnName);
+				jsonObj.put(columnName, value);
+			}
+			System.out.println("jsonObj.toString() = " + jsonObj.toString());
+			System.out.println("contains= "
+					+ (jsonObj.toString().contains("\\\"" + userId + "\\\"")));
+			if (!jsonObj.toString().contains("\\\"" + userId + "\\\"")) {
+				continue;
+			}
+			array.put(jsonObj);
+		}
+		JSONObject json = new JSONObject();
+		json.put("records", array);
+
+		json.put("pageSize", count);
+
+		return json.toString();
 	}
 
 }

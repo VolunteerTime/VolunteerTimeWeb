@@ -56,8 +56,59 @@ public class VolunteerTimeActivityCenterServlet extends HttpServlet {
 			case 3:
 				updateReadNum(request, response);
 				break;
+			case 4:
+				sendNewDataByUserId(request, response);
+				break;
 
 			}
+		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 */
+	private void sendNewDataByUserId(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		String userId = request.getParameter("userId");
+		// 设置输出内容的文档类型和编码
+		response.setContentType("text/javascript;charset=UTF-8");
+
+		log.debug("****************成果展示数据查询****************");
+		log.debug("开始查询······");
+		System.out.println("****************成果展示数据查询****************");
+		System.out.println("开始查询······");
+
+		String rsStr = "";
+
+		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
+		// 创建Dao对象，用于从数据库查询数据
+
+		ActivityCenterDao dao = new ActivityCenterDaoImpl();
+
+		try {
+			// 获取系统当前时间，统计 花费时间
+			long startTime = System.currentTimeMillis();
+
+			rsStr = dao.get(userId);
+
+			// 获取系统当前时间，统计花费时间
+			long endTime = System.currentTimeMillis();
+			log.debug("查询所花时间：" + (endTime - startTime) + "毫秒");
+			log.debug("查询结果：" + rsStr);
+
+			// 获取http输出流对象
+			PrintWriter writer = response.getWriter();
+			log.debug("开始网络传输······");
+			// 获取系统当前时间，用于统计所花费的时间
+			startTime = System.currentTimeMillis();
+			writer.write(rsStr);
+			// 获取系统当前时间，用于统计所花费的时间
+			endTime = System.currentTimeMillis();
+			log.debug("网络传输所花时间：" + (endTime - startTime) + "毫秒");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
