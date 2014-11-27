@@ -41,4 +41,27 @@ public interface UserInfoDao {
 			String sex, String className, String longPhone, String briefPhone,
 			String qq, String wechant);
 
+	/**
+	 * @param userId
+	 * @return
+	 */
+	String getUserInfo(String userId);
+
+	/**
+	 * @param userId
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	String commitUserInfo(String userId, String key, String value);
+
+	/**
+	 * @param userId
+	 * @param orignPassword
+	 * @param newPassword
+	 * @return
+	 */
+	String changePassword(String userId, String orignPassword,
+			String newPassword);
+
 }

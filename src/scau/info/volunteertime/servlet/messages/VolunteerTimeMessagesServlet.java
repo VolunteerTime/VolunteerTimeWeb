@@ -56,8 +56,62 @@ public class VolunteerTimeMessagesServlet extends HttpServlet {
 			case 3:
 				getNewMessage(request, response);
 				break;
-
+			case 4:
+				UpdateSent(request, response);
+				break;
 			}
+		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 */
+	private void UpdateSent(HttpServletRequest request,
+			HttpServletResponse response) {
+		String value = request.getParameter("id");
+		int id = 0;
+
+		if (value != null) {
+			id = Integer.parseInt(value);
+		}
+
+		// 设置输出内容的文档类型和编码
+		response.setContentType("text/javascript;charset=UTF-8");
+
+		log.debug("****************成果展示数据查询****************");
+		log.debug("开始查询······");
+		System.out.println("****************成果展示数据查询****************");
+		System.out.println("开始查询······");
+
+		String rsStr = "";
+
+		// **********************根据当前页数及页面大小从数据库中获取相关信息**********************
+		// 创建Dao对象，用于从数据库查询数据
+
+		MessagesDao dao = new MessagesDaoImpl();
+
+		try {
+			// 获取系统当前时间，统计 花费时间
+			long startTime = System.currentTimeMillis();
+
+			rsStr = dao.updateSent(id);
+			// 获取系统当前时间，统计花费时间
+			long endTime = System.currentTimeMillis();
+			log.debug("查询所花时间：" + (endTime - startTime) + "毫秒");
+			log.debug("查询结果：" + rsStr);
+
+			// 获取http输出流对象
+			PrintWriter writer = response.getWriter();
+			log.debug("开始网络传输······");
+			// 获取系统当前时间，用于统计所花费的时间
+			startTime = System.currentTimeMillis();
+			writer.write(rsStr);
+			// 获取系统当前时间，用于统计所花费的时间
+			endTime = System.currentTimeMillis();
+			log.debug("网络传输所花时间：" + (endTime - startTime) + "毫秒");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -71,12 +125,6 @@ public class VolunteerTimeMessagesServlet extends HttpServlet {
 
 		String password = request.getParameter("password");
 
-		try {
-			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
-			password = new String(password.getBytes("ISO-8859-1"), "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
 		// 设置输出内容的文档类型和编码
 		response.setContentType("text/javascript;charset=UTF-8");
 
@@ -182,11 +230,6 @@ public class VolunteerTimeMessagesServlet extends HttpServlet {
 			HttpServletResponse response) {
 		String userId = request.getParameter("userId");
 
-		try {
-			userId = new String(userId.getBytes("ISO-8859-1"), "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
 		// 设置输出内容的文档类型和编码
 		response.setContentType("text/javascript;charset=UTF-8");
 
@@ -234,21 +277,13 @@ public class VolunteerTimeMessagesServlet extends HttpServlet {
 	 */
 	private void saveMessages(HttpServletRequest request,
 			HttpServletResponse response) {
+		
 		String principalId = request.getParameter("principalId");
 		String participators = request.getParameter("participators");
 		String message = request.getParameter("message");
 		String title = request.getParameter("title");
 
-		try {
-			principalId = new String(principalId.getBytes("ISO-8859-1"),
-					"UTF-8");
-			participators = new String(participators.getBytes("ISO-8859-1"),
-					"UTF-8");
-			message = new String(message.getBytes("ISO-8859-1"), "UTF-8");
-			title = new String(title.getBytes("ISO-8859-1"), "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
+
 		// 设置输出内容的文档类型和编码
 		response.setContentType("text/javascript;charset=UTF-8");
 

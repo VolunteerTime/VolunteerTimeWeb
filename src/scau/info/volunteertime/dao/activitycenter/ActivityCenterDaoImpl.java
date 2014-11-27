@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,18 +19,14 @@ import org.json.JSONObject;
 
 import scau.info.volunteertime.tool.DatabaseConnection;
 import scau.info.volunteertime.tool.factory.DatabaseConnectionFactory;
+import scau.info.volunteertime.vo.ActivityData;
+import scau.info.volunteertime.vo.Result;
 
 /**
  * @author ≤Ã≥¨√Ù
  * 
  */
 public class ActivityCenterDaoImpl implements ActivityCenterDao {
-
-	@Override
-	public String add() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String delete() {
@@ -453,6 +451,193 @@ public class ActivityCenterDaoImpl implements ActivityCenterDao {
 		json.put("pageSize", count);
 
 		return json.toString();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.activitycenter.ActivityCenterDao#getAll(java
+	 * .lang.String)
+	 */
+	@Override
+	public List<ActivityData> getAll(String keyword) {
+		String sql;
+		if (keyword == null || keyword.equals(""))
+			sql = "SELECT * FROM activity_center ORDER BY publish_time DESC ";
+		else {
+			sql = "SELECT * FROM activity_center where title like '%" + keyword
+					+ "%' ORDER BY publish_time DESC ";
+		}
+		System.out.println("sql = " + sql);
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+		List<ActivityData> activityDatas = null;
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+
+			activityDatas = new ArrayList<ActivityData>();
+
+			ActivityData activityData;
+			while (rs.next()) {
+				activityData = new ActivityData();
+
+				activityData.setId(rs.getInt("id"));
+				activityData.setTitle(rs.getString("title"));
+				activityData.setContent(rs.getString("content"));
+				activityData.setImage(rs.getString("image"));
+				activityData.setEditor(rs.getString("editor"));
+				activityData.setPublishTime(rs.getLong("publish_time"));
+				activityData.setEndTime(rs.getLong("end_time"));
+				activityData
+						.setParticipatorsNum(rs.getInt("participators_num"));
+				activityData.setReadNum(rs.getInt("read_num"));
+				activityData.setLimitNum(rs.getInt("limit_num"));
+				activityData.setGroupId(rs.getInt("group_id"));
+
+				activityDatas.add(activityData);
+			}
+
+			for (ActivityData activityData2 : activityDatas) {
+				if (activityData2.getGroupId() != 0) {
+					sql = "select principal_id , participators from activity_group WHERE id ="
+							+ activityData2.getGroupId();
+					statement = conn.createStatement();
+					rs = statement.executeQuery(sql);
+					rs.next();
+					String principal_id = rs.getString("principal_id");
+					System.out.println("checkDate principal_id = "
+							+ principal_id);
+
+					String participators = rs.getString("participators");
+					System.out.println("checkDate participators = "
+							+ participators);
+
+					activityData2.setPrincipalId(principal_id);
+					activityData2.setParticipators(participators);
+
+					List<String> partors = new ArrayList<String>();
+
+					JSONArray array;
+					try {
+						JSONObject json = new JSONObject(participators);
+						array = json.getJSONArray("userIds");
+						int len = array.length();
+						for (int i = 0; i < len; i++) {
+							JSONObject jsonObj = array.getJSONObject(i);
+							String userIdByJson = jsonObj.getString("userId");
+							partors.add(userIdByJson);
+						}
+						activityData2.setParticipatorList(partors);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+
+				}
+			}
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return activityDatas;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.activitycenter.ActivityCenterDao#choiceMainer
+	 * (int, java.lang.String)
+	 */
+	@Override
+	public String choiceMainer(int id, String userId) {
+		String sql = "UPDATE activity_group SET principal_id = '" + userId
+				+ "' WHERE id = " + id;
+
+		System.out.println("sql = " + sql);
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			statement.executeUpdate(sql);
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "false";
+		}
+
+		return "true";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.activitycenter.ActivityCenterDao#add(scau
+	 * .info.volunteertime.vo.ActivityData)
+	 */
+	@Override
+	public String add(ActivityData activityData) {
+		String sql = "";
+
+		Connection conn = null;
+		Statement statement;
+		DatabaseConnection dbc = null;
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			sql = "INSERT INTO activity_center (title,content,image,editor,publish_time,end_time,limit_num,participators_num,group_id,read_num"
+					+ ") VALUES('"
+					+ activityData.getTitle()
+					+ "','"
+					+ activityData.getContent()
+					+ "','"
+					+ activityData.getImage()
+					+ "','"
+					+ activityData.getEditor()
+					+ "',"
+					+ activityData.getPublishTime()
+					+ ","
+					+ activityData.getEndTime()
+					+ ","
+					+ activityData.getLimitNum() + ",0,0,0);";
+
+			System.out.println("sql = " + sql);
+			statement = conn.createStatement();
+			statement.executeUpdate(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				System.out.println("conn.close() err");
+				e.printStackTrace();
+			}
+			dbc.close();
+		}
+		return null;
 	}
 
 }

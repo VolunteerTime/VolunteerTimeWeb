@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +19,7 @@ import org.json.JSONObject;
 
 import scau.info.volunteertime.tool.DatabaseConnection;
 import scau.info.volunteertime.tool.factory.DatabaseConnectionFactory;
+import scau.info.volunteertime.vo.Result;
 
 /**
  * @author ²Ì³¬Ãô
@@ -25,15 +28,34 @@ import scau.info.volunteertime.tool.factory.DatabaseConnectionFactory;
 public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 
 	@Override
-	public String add() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public String delete(int id) {
+		String sql = "";
 
-	@Override
-	public String delete() {
-		// TODO Auto-generated method stub
-		return null;
+		Connection conn = null;
+		Statement statement;
+		DatabaseConnection dbc = null;
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			sql = "delete from results where id = " + id;
+
+			System.out.println("sql = " + sql);
+			statement = conn.createStatement();
+			if (statement.executeUpdate(sql) > 0) {
+				return "true";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				System.out.println("conn.close() err");
+				e.printStackTrace();
+			}
+			dbc.close();
+		}
+		return "false";
 	}
 
 	@Override
@@ -257,4 +279,159 @@ public class ResultsExhibitionDaoImpl implements ResultsExhibitionDao {
 		return "success";
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.resultsexhibition.ResultsExhibitionDao#getAll
+	 * ()
+	 */
+	@Override
+	public List<Result> getAll() {
+		String sql = "SELECT * FROM results ORDER BY publishTime DESC ";
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+		List<Result> results = null;
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+
+			results = new ArrayList<Result>();
+
+			Result result;
+			while (rs.next()) {
+				result = new Result();
+
+				result.setId(rs.getInt("id"));
+				result.setTitle(rs.getString("title"));
+				result.setContent(rs.getString("content"));
+				result.setImage(rs.getString("image"));
+				result.setEditor(rs.getString("editor"));
+				result.setPublishTime(rs.getLong("publishTime"));
+				result.setReadNum(rs.getInt("read_num"));
+				result.setCommentNum(rs.getInt("comment_num"));
+
+				results.add(result);
+			}
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return results;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.resultsexhibition.ResultsExhibitionDao#getAll
+	 * (java.lang.String)
+	 */
+	@Override
+	public List<Result> getAll(String keyword) {
+		String sql;
+		if (keyword == null || keyword.equals(""))
+			sql = "SELECT * FROM results ORDER BY publishTime DESC ";
+		else {
+			sql = "SELECT * FROM results where title like '%" + keyword
+					+ "%' ORDER BY publishTime DESC ";
+		}
+
+		System.out.println("sql = " + sql);
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		ResultSet rs;
+		DatabaseConnection dbc = null;
+		List<Result> results = null;
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql);
+
+			results = new ArrayList<Result>();
+
+			Result result;
+			while (rs.next()) {
+				result = new Result();
+
+				result.setId(rs.getInt("id"));
+				result.setTitle(rs.getString("title"));
+				result.setContent(rs.getString("content"));
+				result.setImage(rs.getString("image"));
+				result.setEditor(rs.getString("editor"));
+				result.setPublishTime(rs.getLong("publishTime"));
+				result.setReadNum(rs.getInt("read_num"));
+				result.setCommentNum(rs.getInt("comment_num"));
+
+				results.add(result);
+			}
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return results;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.resultsexhibition.ResultsExhibitionDao#add
+	 * (scau.info.volunteertime.vo.Result)
+	 */
+	@Override
+	public String add(Result result) {
+		String sql = "";
+
+		Connection conn = null;
+		Statement statement;
+		DatabaseConnection dbc = null;
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			sql = "INSERT INTO results (title,content,image,editor,publishTime,read_num"
+					+ ") VALUES('"
+					+ result.getTitle()
+					+ "','"
+					+ result.getContent()
+					+ "','"
+					+ result.getImage()
+					+ "','"
+					+ result.getEditor()
+					+ "',"
+					+ System.currentTimeMillis()
+					+ ",0);";
+
+			System.out.println("sql = " + sql);
+			statement = conn.createStatement();
+			statement.executeUpdate(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				System.out.println("conn.close() err");
+				e.printStackTrace();
+			}
+			dbc.close();
+		}
+		return null;
+	}
 }

@@ -173,13 +173,17 @@ public class MessagesDaoImpl implements MessagesDao {
 		return "success";
 	}
 
-	/* (non-Javadoc)
-	 * @see scau.info.volunteertime.dao.messages.MessagesDao#getNewMessage(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * scau.info.volunteertime.dao.messages.MessagesDao#getNewMessage(java.lang
+	 * .String)
 	 */
 	@Override
 	public String getNewMessage(String userId) {
-		String sql = "SELECT * FROM message WHERE is_send=0 and receive_user_id = '" + userId
-				+ "' LIMIT 0,1";
+		String sql = "SELECT * FROM message WHERE is_send=0 and receive_user_id = '"
+				+ userId + "' LIMIT 0,1";
 
 		String jsonInfo = null;
 		Connection conn = null;
@@ -203,6 +207,39 @@ public class MessagesDaoImpl implements MessagesDao {
 		}
 
 		return jsonInfo;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see scau.info.volunteertime.dao.messages.MessagesDao#updateSent(int)
+	 */
+	@Override
+	public String updateSent(int id) {
+		String sql = "UPDATE message SET is_send = 1 WHERE id = " + id;
+
+		System.out.println("sql = " + sql);
+
+		String jsonInfo = null;
+		Connection conn = null;
+		Statement statement;
+		DatabaseConnection dbc = null;
+
+		try {
+			dbc = DatabaseConnectionFactory.getDatabaseConnection();
+			conn = dbc.getConnection();
+			statement = conn.createStatement();
+			statement.executeUpdate(sql);
+
+			conn.close();
+			dbc.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "failure";
+		}
+
+		return "success";
 	}
 
 }

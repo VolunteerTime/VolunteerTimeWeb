@@ -37,4 +37,10 @@ public interface MessagesDao {
 	 */
 	String getNewMessages(String userId);
 
+	/**
+	 * @param id
+	 * @return
+	 */
+	String updateSent(int id);
+
 }

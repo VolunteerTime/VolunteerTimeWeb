@@ -5,12 +5,16 @@
  */
 package scau.info.volunteertime.dao.activitycenter;
 
+import java.util.List;
+
+import scau.info.volunteertime.vo.ActivityData;
+
 /**
  * @author ≤Ã≥¨√Ù
  * 
  */
 public interface ActivityCenterDao {
-	public abstract String add();
+	public abstract String add(ActivityData activityData);
 
 	public abstract String delete();
 
@@ -37,4 +41,12 @@ public interface ActivityCenterDao {
 	 */
 	public abstract String get(String userId);
 
+	public abstract List<ActivityData> getAll(String keyword);
+
+	/**
+	 * @param id
+	 * @param userId
+	 * @return
+	 */
+	public abstract String choiceMainer(int id, String userId);
 }
